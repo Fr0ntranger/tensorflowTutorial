@@ -8,6 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 import tensorflow as tf
 
+sess = tf.InteractiveSession()
 ###############################################################################
 # 1a: Create two random 0-d tensors x and y of any distribution.
 # Create a TensorFlow object that returns x + y if x > y, and x - y otherwise.
@@ -20,17 +21,27 @@ y = tf.random_uniform([])
 z = tf.cond(x > y, lambda: tf.add(x,y), lambda: tf.subtract(x,y))
 
 
-with tf.Session() as sess:
-	x,y,z = sess.run([x,y,z])
-	print(x,y,z)
+x,y,z = sess.run([x,y,z])
+print(x,y,z)
+print("\n")
 
 ###############################################################################
 # 1b: Create two 0-d tensors x and y randomly selected from the range [-1, 1).
 # Return x + y if x < y, x - y if x > y, 0 otherwise.
 # Hint: Look up tf.case().
 ###############################################################################
+x = tf.random_uniform([], minval=-1.0, maxval=1.0)
+y = tf.random_uniform([], minval=-1.0, maxval=1.0)
 
-# YOUR CODE
+def f1(): return tf.add(x,y)
+def f2(): return tf.subtract(x,y)
+def f3(): return 0.0
+
+z = tf.case({tf.less(x,y):f1, tf.greater(x,y): f2}, default=f3, exclusive=True)
+
+x,y,z = sess.run([x,y,z])
+print(x,y,z)
+print("\n")
 
 ###############################################################################
 # 1c: Create the tensor x of the value [[0, -2, -1], [0, 1, 2]] 
@@ -39,7 +50,13 @@ with tf.Session() as sess:
 # Hint: Look up tf.equal().
 ###############################################################################
 
-# YOUR CODE
+x = tf.constant([[0, -2, -1], [0, 1, 2]], dtype=tf.float32)
+y = tf.zeros(tf.shape(x))
+z = tf.equal(x,y)
+
+x,y,z = sess.run([x,y,z])
+print(x,y,z)
+print("\n")
 
 ###############################################################################
 # 1d: Create the tensor x of value 
@@ -54,23 +71,39 @@ with tf.Session() as sess:
 # Hint: Use tf.gather().
 ###############################################################################
 
-# YOUR CODE
+x = tf.constant([29.05088806,  27.61298943,  31.19073486,  29.35532951,
+  				 30.97266006,  26.67541885,  38.08450317,  20.74983215,
+   				 34.94445419,  34.45999146,  29.06485367,  36.01657104,
+   				 27.88236427,  20.56035233,  30.20379066,  29.51215172,
+   				 33.71149445,  28.59134293,  36.05556488,  28.66994858])
+
+y = tf.gather(x, tf.where(tf.greater(x,30)))
+
+
+print(sess.run(y))
+print("\n")
 
 ###############################################################################
 # 1e: Create a diagnoal 2-d tensor of size 6 x 6 with the diagonal values of 1,
 # 2, ..., 6
 # Hint: Use tf.range() and tf.diag().
 ###############################################################################
-
-# YOUR CODE
+diagonal = tf.range(1,7)
+x = tf.diag(diagonal)
+print(sess.run(x))
+print("\n")
 
 ###############################################################################
 # 1f: Create a random 2-d tensor of size 10 x 10 from any distribution.
 # Calculate its determinant.
 # Hint: Look at tf.matrix_determinant().
 ###############################################################################
+x = tf.random_uniform(dtype=tf.float32, shape=(6,6))
+det = tf.matrix_determinant(x)
 
-# YOUR CODE
+x,det = sess.run([x,det])
+print(x,det)
+print("\n")
 
 ###############################################################################
 # 1g: Create tensor x with value [5, 2, 3, 5, 10, 6, 2, 3, 4, 2, 1, 1, 0, 9].
@@ -78,8 +111,10 @@ with tf.Session() as sess:
 # Hint: use tf.unique(). Keep in mind that tf.unique() returns a tuple.
 ###############################################################################
 
-# YOUR CODE
+x = tf.constant([5, 2, 3, 5, 10, 6, 2, 3, 4, 2, 1, 1, 0, 9])
+y = tf.unique(x)
 
+print(sess.run(y))
 ###############################################################################
 # 1h: Create two tensors x and y of shape 300 from any normal distribution,
 # as long as they are from the same distribution.
@@ -90,4 +125,12 @@ with tf.Session() as sess:
 # Hint: see the Huber loss function in the lecture slides 3.
 ###############################################################################
 
-# YOUR CODE
+x = tf.random_normal([300], mean=5, stddev=1)
+y = tf.random_normal([300], mean=5, stddev=1)
+
+def f1(): return tf.reduce_mean(tf.square(x-y))
+def f2(): return tf.reduce_sum(tf.abs(x-y))
+
+out = tf.cond(tf.reduce_mean(x-y) < 0, f1, f2)
+
+print(sess.run(out))
