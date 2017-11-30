@@ -10,12 +10,14 @@ from tensorflow.examples.tutorials.mnist import input_data
 import time
 
 #Basic model parameters
-learning_rate = 0.5
+learning_rate = 0.1
 batch_size = 128
-n_epochs = 25
+n_epochs = 10
 
 #Read in data from MNIST
 mnist = input_data.read_data_sets('/data/mnist', one_hot=True) 
+print(mnist.train.num_examples)
+print(mnist.test.num_examples)
 
 #Create placeholders for data tensors
 x = tf.placeholder(dtype=tf.float32, shape=[batch_size, 784], name="image")
